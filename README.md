@@ -1,34 +1,80 @@
+# Bookstocker
 
-Book Inventory Manager for Amuze
-=======
-Bookstocker
-=============
+Bookstocker is a Python-based book inventory manager with a GUI, batch tracking, wishlist handling, shipment status updates, and JSON persistence.
 
-Simple Book Stock Manager (CLI + JSON persistence).
+## What This Project Includes
 
-Requirements
-- Python 3.8+
-- (optional) `pytest` to run tests
+- Home dashboard with inventory totals
+- Requests / wishlist list
+- Batch creation, commit, and item removal
+- In-shipment tracking with status updates
+- Overall inventory view grouped by batch
+- JSON persistence for books, batches, requests, and shipments
+- Tkinter GUI and a ttkbootstrap dashboard demo
 
-Quick start
+## Requirements
 
-Install deps (optional):
+- Python 3.11 or newer recommended
+- `ttkbootstrap`
+- `Pillow`
+- `pytest` if you want to run tests
+
+## Setup
+
+Install dependencies from the project root:
 
 ```bash
 python -m pip install -r requirements.txt
 ```
 
-Run CLI:
+If you are using a virtual environment and PowerShell blocks script activation, you can run the venv Python directly:
 
-```bash
-python -m Bookstocker.cli add --isbn 9780143127741 --title "Sapiens" --author "Yuval Noah Harari" --qty 3
-python -m Bookstocker.cli list
-python -m Bookstocker.cli search --q sapiens
+```powershell
+.\.venv\Scripts\python -m pip install -r requirements.txt
 ```
 
-Project layout
+## Run The App
 
-- `stock_manager/manager.py`: core logic
-- `cli.py`: command-line interface
-- `data/books.json`: persisted store (created on demand)
->>>>>>> 8792a71 (Initial commit for Muze Inventory Manager UI updates)
+Launch the main Bookstocker GUI:
+
+```bash
+python -m Bookstocker
+```
+
+Run the ttkbootstrap dashboard demo:
+
+```bash
+python dashboard_ttk.py
+```
+
+
+## Data Files
+
+The app stores its data in the `data/` folder:
+
+- `data/books.json`
+- `data/batches.json`
+- `data/requests.json`
+- `data/shipments.json`
+- `data/archives/`
+
+These files are created automatically when you use the app.
+
+## Project Layout
+
+- `stock_manager/manager.py` - core inventory and persistence logic
+- `gui.py` - main Tkinter GUI
+- `dashboard_ttk.py` - ttkbootstrap dashboard demo
+- `cli.py` - command-line interface
+- `tests/` - automated tests
+- `tools/generate_placeholders.py` - creates placeholder UI images
+
+## Notes
+
+- The dashboard demo uses images in `assets/buttons/` for the sidebar button art.
+- If you update the assets, restart the app to reload them.
+- If you want to run tests, use:
+
+```bash
+pytest
+```
