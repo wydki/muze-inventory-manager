@@ -1,0 +1,3 @@
+pytest
+Pillow>=9.0.0
+ttkbootstrap>=1.6.0

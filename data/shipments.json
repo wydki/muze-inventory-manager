@@ -1,0 +1,18 @@
+[
+  {
+    "batch_id": "46b628d8-4970-4c08-ad5f-6030f494c944",
+    "status": "NOT SHIPPED"
+  },
+  {
+    "batch_id": "521519f9-7f58-42d3-ac74-bd6a531fde7b",
+    "status": "NOT SHIPPED"
+  },
+  {
+    "batch_id": "770582eb-373b-46b3-8ea7-7b46a0bbe239",
+    "status": "RECEIVED"
+  },
+  {
+    "batch_id": "82477ef8-e8c9-4892-b653-6f9d25e738e4",
+    "status": "RECEIVED"
+  }
+]
