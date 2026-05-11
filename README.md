@@ -1,11 +1,11 @@
 # Bookstocker
 
-Bookstocker is a Python-based book inventory manager with a GUI, batch tracking, wishlist handling, shipment status updates, and JSON persistence.
+Bookstocker is a Python-based book inventory manager specifically made for my Girlfriend with a GUI, batch tracking, wishlist handling, shipment status updates, and JSON persistence.
 
 ## What This Project Includes
 
 - Home dashboard with inventory totals
-- Requests / wishlist list
+- Requested books list
 - Batch creation, commit, and item removal
 - In-shipment tracking with status updates
 - Overall inventory view grouped by batch
