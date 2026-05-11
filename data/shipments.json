@@ -14,5 +14,9 @@
   {
     "batch_id": "82477ef8-e8c9-4892-b653-6f9d25e738e4",
     "status": "RECEIVED"
+  },
+  {
+    "batch_id": "b95ce17d-69d7-4b1f-acd8-d580bdf2130f",
+    "status": "NOT SHIPPED"
   }
 ]

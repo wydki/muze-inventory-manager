@@ -12,7 +12,7 @@ class Book:
     isbn: Optional[str] = ""
     title: str = ""
     author: str = ""
-    book_type: str = "paperback"  # 'paperback' or 'hardcover'
+    book_type: str = "Paperback"  # 'paperback' or 'hardcover'
     quantity: int = 0
     batch_id: str = ""
     batch_source: str = ""  # batch name/ID that this item came from

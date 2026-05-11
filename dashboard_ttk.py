@@ -114,96 +114,89 @@ class DashboardDemo(tb.Window):
         container.pack(fill="both", expand=True)
         container.columnconfigure(1, weight=1)
         # sidebar
-        sidebar = tb.Frame(container, width=360)
+        sidebar = tb.Frame(container, width=420)
         sidebar.grid(row=0, column=0, sticky="nsw", padx=(0, 8))
         sidebar.pack_propagate(False)
 
         if "logo.png" in self._images:
             lbl = tb.Label(sidebar, image=self._images["logo.png"]) 
-            lbl.pack(pady=(6, 12))
+            lbl.pack(pady=(8, 16))
         else:
-            tb.Label(sidebar, text="Bookstocker", font=(None, 16, "bold")).pack(pady=(6, 12))
+            tb.Label(sidebar, text="Bookstocker", font=(None, 16, "bold")).pack(pady=(8, 16))
 
         # nav buttons
         nav_items = [
             ("Dashboard", "icon_dashboard.png"),
-            ("Inventory", "icon_inventory.png"),
-            ("Orders", "icon_orders.png"),
-            ("Purchase", "icon_purchase.png"),
-            ("Reporting", "icon_reporting.png"),
-            ("Support", "icon_support.png"),
-            ("Settings", "icon_settings.png"),
+            ("Requests", "icon_inventory.png"),
+            ("Shipment", "icon_orders.png"),
+            ("Batch", "icon_purchase.png"),
+            ("Stock", "icon_reporting.png"),
         ]
         for i, (text, icon) in enumerate(nav_items):
-            # Try the uploaded custom button art on the first menu item.
-            if i == 0 and "buttons/btn_primary.png" in self._images:
-                self._make_image_sidebar_button(sidebar, text)
-                continue
-
             if icon in self._images:
                 b = tb.Button(sidebar, text=text, image=self._images[icon], compound=LEFT, bootstyle="light")
             else:
-                b = tb.Button(sidebar, text=text, bootstyle="light")
-            b.pack(fill="x", pady=4, padx=6)
+                b = tb.Button(sidebar, text=text, bootstyle="light", width=24)
+            b.pack(fill="x", pady=6, padx=8)
 
-        tb.Separator(sidebar, orient="horizontal").pack(fill="x", pady=8, padx=6)
-        if "icon_logout.png" in self._images:
-            tb.Button(sidebar, text="Logout", image=self._images["icon_logout.png"], compound=LEFT, bootstyle="danger").pack(fill="x", pady=4, padx=6)
-        else:
-            tb.Button(sidebar, text="Logout", bootstyle="danger").pack(fill="x", pady=4, padx=6)
 
         # top + content area
         main = tb.Frame(container)
         main.grid(row=0, column=1, sticky="nsew")
-        main.columnconfigure(0, weight=1)
+        main.columnconfigure(0, weight=2)
+        main.columnconfigure(1, weight=1)
+        main.rowconfigure(2, weight=1)
 
-        # header
+        # header with greeting
         header = tb.Frame(main)
-        header.grid(row=0, column=0, sticky="ew", pady=(0, 8))
+        header.grid(row=0, column=0, columnspan=2, sticky="ew", pady=(0, 8))
         header.columnconfigure(0, weight=1)
-        title = tb.Label(header, text="Inventory Management", font=(None, 22, "bold"))
+        title = tb.Label(header, text="Hi, User", font=(None, 20, "bold"))
         title.grid(row=0, column=0, sticky="w")
-        if "avatar.png" in self._images:
-            tb.Label(header, image=self._images["avatar.png"]).grid(row=0, column=1, sticky="e")
 
-        # stat cards grid
+        # stat cards grid (4 columns)
         cards = tb.Frame(main)
-        cards.grid(row=1, column=0, sticky="nsew")
+        cards.grid(row=1, column=0, columnspan=2, sticky="nsew", pady=(0, 8))
         for i in range(4):
             cards.columnconfigure(i, weight=1)
 
         stats = [
-            ("Total Products", "5483", "stat_total.png"),
-            ("Orders", "2859", "stat_orders.png"),
-            ("Total Stock", "5483", "stat_stock.png"),
-            ("Out of Stock", "38", "stat_out.png"),
+            ("Total Books in Stock", "00"),
+            ("Total Batches", "00"),
+            ("Batches in Shipment", "00"),
+            ("Requested Books", "00"),
         ]
-        for idx, (label, val, icon) in enumerate(stats):
+        for idx, (label, val) in enumerate(stats):
             f = tb.Frame(cards, padding=10, bootstyle="light")
             f.grid(row=0, column=idx, padx=6, sticky="nsew")
-            if icon in self._images:
-                tb.Label(f, image=self._images[icon]).pack(anchor="w")
-            tb.Label(f, text=val, font=(None, 18, "bold")).pack(anchor="w")
-            tb.Label(f, text=label).pack(anchor="w")
+            tb.Label(f, text=val, font=(None, 20, "bold")).pack(anchor="w")
+            tb.Label(f, text=label, font=(None, 10)).pack(anchor="w")
+            tb.Button(f, text="View", bootstyle="info").pack(anchor="w", pady=(6, 0))
 
-        # content area below
+        # content area below (left large + right sidebar)
         content = tb.Frame(main)
-        content.grid(row=2, column=0, sticky="nsew", pady=(12, 0))
+        content.grid(row=2, column=0, columnspan=2, sticky="nsew", pady=(0, 0))
         content.columnconfigure(0, weight=2)
         content.columnconfigure(1, weight=1)
 
-        # left large card (placeholder for charts/table)
-        left_card = tb.Frame(content, padding=12, bootstyle="secondary")
+        # left large card (display total books per batch)
+        left_card = tb.Frame(content, padding=12, bootstyle="light")
         left_card.grid(row=0, column=0, sticky="nsew", padx=(0, 6))
-        tb.Label(left_card, text="Overview / Charts", font=(None, 14, "bold")).pack(anchor="w")
+        tb.Label(left_card, text="Display Total Books per Batch here", font=(None, 12, "bold")).pack(anchor="w", expand=True)
 
-        # right small cards
-        right_stack = tb.Frame(content)
-        right_stack.grid(row=0, column=1, sticky="nsew")
+        # right sidebar: requested books
+        right_card = tb.Frame(content, padding=12, bootstyle="light")
+        right_card.grid(row=0, column=1, sticky="nsew")
+        tb.Label(right_card, text="Requested Books", font=(None, 14, "bold")).pack(anchor="w", pady=(0, 8))
+        
+        # sample requested books
+        books_frame = tb.Frame(right_card)
+        books_frame.pack(fill="both", expand=True)
         for i in range(3):
-            c = tb.Frame(right_stack, padding=8, bootstyle="light")
-            c.pack(fill="x", pady=6)
-            tb.Label(c, text=f"Small Card {i+1}", font=(None, 12, "bold")).pack(anchor="w")
+            book_item = tb.Frame(books_frame, padding=6, bootstyle="secondary")
+            book_item.pack(fill="x", pady=4)
+            tb.Label(book_item, text=f"Book Title {i+1}", font=(None, 10, "bold")).pack(anchor="w")
+            tb.Label(book_item, text="paperback", font=(None, 8)).pack(anchor="w")
 
         # footer / hint
         tb.Label(self, text="Demo UI — replace assets in `assets/` with your images").pack(side="bottom", pady=6)

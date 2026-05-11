@@ -1,8 +1,40 @@
 [
   {
-    "id": "c119bec7-c666-4f68-9c8c-d800e51ec9ba",
+    "id": "b95ce17d-69d7-4b1f-acd8-d580bdf2130f",
     "name": "Batch 1",
-    "items": [],
+    "items": [
+      {
+        "title": "The Spanish Love Deception",
+        "book_type": "paperback",
+        "quantity": 1
+      },
+      {
+        "title": "If We Ever Meet Again",
+        "book_type": "paperback",
+        "quantity": 8
+      },
+      {
+        "title": "Circe",
+        "book_type": "paperback",
+        "quantity": 17
+      },
+      {
+        "title": "Red, White & Royal Blue",
+        "book_type": "paperback",
+        "quantity": 5
+      },
+      {
+        "title": "Bully",
+        "book_type": "paperback",
+        "quantity": 1
+      }
+    ],
     "committed": true
+  },
+  {
+    "id": "d2b6f3fa-c5ab-42ca-b9fc-83f388f0a39c",
+    "name": "Batch 2",
+    "items": [],
+    "committed": false
   }
 ]

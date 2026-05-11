@@ -1,11 +1,21 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+import ttkbootstrap as tb
+from ttkbootstrap.constants import LEFT
 from .stock_manager import StockManager
 
+# Subtle blue color palette (matching dashboard_ttk)
+SIDEBAR_BG = "#f7fafc"
+CONTENT_BG = "#ffffff"
+CARD_BG = "#f7fafc"
+BORDER_COLOR = "#e2e8f0"
+TEXT_COLOR = "#1e293b"
+ACCENT_BLUE = "#3b82f6"
 
-class BookstockerApp(tk.Tk):
+
+class BookstockerApp(tb.Window):
     def __init__(self, data_file: str = None):
-        super().__init__()
+        super().__init__(themename="flatly")
         self.title("Bookstocker")
         self.state('zoomed')  # full screen on Windows
         self.mgr = StockManager(data_file=data_file) if data_file else StockManager()
@@ -14,14 +24,15 @@ class BookstockerApp(tk.Tk):
         self.columnconfigure(1, weight=1)
         self.rowconfigure(0, weight=1)
 
-        self.sidebar = tk.Frame(self, width=200, bg="#f0f0f0")
+        self.sidebar = tb.Frame(self, width=200)
         self.sidebar.grid(row=0, column=0, sticky="nswe")
+        self.sidebar.pack_propagate(False)
 
         # App title at top-left
-        title_label = tk.Label(self.sidebar, text="Amuze Inventory Manager", bg="#f0f0f0", font=(None, 12, 'bold'), anchor="w")
+        title_label = tb.Label(self.sidebar, text="Amuze Inventory Manager", font=(None, 12, 'bold'), anchor="w")
         title_label.pack(fill="x", padx=8, pady=8)
 
-        self.content = tk.Frame(self)
+        self.content = tb.Frame(self)
         self.content.grid(row=0, column=1, sticky="nsew")
         self.content.columnconfigure(0, weight=1)
         self.content.rowconfigure(1, weight=1)
@@ -36,7 +47,7 @@ class BookstockerApp(tk.Tk):
         ]
 
         for i, (label, cmd) in enumerate(btns):
-            b = tk.Button(self.sidebar, text=label, command=cmd, anchor="w")
+            b = tb.Button(self.sidebar, text=label, command=cmd, bootstyle="light")
             b.pack(fill="x", padx=8, pady=(6 if i == 0 else 4))
 
         # Archive and Clear stock buttons at the bottom-left
@@ -49,7 +60,7 @@ class BookstockerApp(tk.Tk):
             # refresh view
             self.show_overall()
 
-        tk.Button(self.sidebar, text="Archive Stock", command=on_archive).pack(side="bottom", fill="x", padx=8, pady=4)
+        tb.Button(self.sidebar, text="Archive Stock", command=on_archive, bootstyle="light").pack(side="bottom", fill="x", padx=8, pady=4)
 
         def on_clear_stock():
             if messagebox.askyesno("Confirm", "Are you sure you want to clear all stock?"):
@@ -58,7 +69,7 @@ class BookstockerApp(tk.Tk):
                 messagebox.showinfo("Cleared", "All stock and batches cleared")
                 self.show_overall()
 
-        tk.Button(self.sidebar, text="Clear Stock", command=on_clear_stock, fg="red").pack(side="bottom", fill="x", padx=8, pady=8)
+        tb.Button(self.sidebar, text="Clear Stock", command=on_clear_stock, bootstyle="danger").pack(side="bottom", fill="x", padx=8, pady=8)
 
         # Start with home view
         self.current_tree = None
@@ -84,11 +95,8 @@ class BookstockerApp(tk.Tk):
 
     def show_home(self):
         self.clear_content()
-        lbl = tk.Label(self.content, text="Home", font=(None, 16, 'bold'))
+        lbl = tb.Label(self.content, text="Home", font=(None, 16, 'bold'))
         lbl.grid(row=0, column=0, sticky="w", padx=8, pady=8)
-
-        stats_frame = tk.Frame(self.content)
-        stats_frame.grid(row=1, column=0, sticky="nw", padx=16, pady=8)
 
         # compute stats
         total_books = 0
@@ -106,21 +114,35 @@ class BookstockerApp(tk.Tk):
         total_shipments = len(self.mgr.list_shipments())
         total_requests = len(self.mgr.list_requests())
 
-        tk.Label(stats_frame, text=f"Total books in stock: {total_books}", font=(None, 12)).pack(anchor="w", pady=4)
-        tk.Label(stats_frame, text=f"Total batches: {total_batches} (Committed: {committed}, Pending: {pending})", font=(None, 12)).pack(anchor="w", pady=4)
-        tk.Label(stats_frame, text=f"Batches in shipment: {total_shipments}", font=(None, 12)).pack(anchor="w", pady=4)
-        tk.Label(stats_frame, text=f"Wishlist requests: {total_requests}", font=(None, 12)).pack(anchor="w", pady=4)
+        # Stat cards grid (4 columns)
+        cards_frame = tb.Frame(self.content)
+        cards_frame.grid(row=1, column=0, sticky="nsew", padx=16, pady=8)
+        for i in range(4):
+            cards_frame.columnconfigure(i, weight=1)
+
+        stats = [
+            ("Total Books in Stock", str(total_books)),
+            ("Total Batches", str(total_batches)),
+            ("Batches in Shipment", str(total_shipments)),
+            ("Requested Books", str(total_requests)),
+        ]
+        for idx, (label, val) in enumerate(stats):
+            f = tb.Frame(cards_frame, padding=10, bootstyle="light")
+            f.grid(row=0, column=idx, padx=6, sticky="nsew")
+            tb.Label(f, text=val, font=(None, 20, "bold")).pack(anchor="w")
+            tb.Label(f, text=label, font=(None, 10)).pack(anchor="w")
+            tb.Button(f, text="View", bootstyle="info").pack(anchor="w", pady=(6, 0))
 
         # Quick actions
-        actions = tk.Frame(self.content)
+        actions = tb.Frame(self.content)
         actions.grid(row=2, column=0, sticky="w", padx=16, pady=12)
-        tk.Button(actions, text="View Batches", command=self.show_batches).pack(side="left", padx=6)
-        tk.Button(actions, text="View Overall Stock", command=self.show_overall).pack(side="left", padx=6)
-        tk.Button(actions, text="View Requests", command=self.show_requests).pack(side="left", padx=6)
+        tb.Button(actions, text="View Batches", command=self.show_batches, bootstyle="primary").pack(side="left", padx=6)
+        tb.Button(actions, text="View Overall Stock", command=self.show_overall, bootstyle="primary").pack(side="left", padx=6)
+        tb.Button(actions, text="View Requests", command=self.show_requests, bootstyle="primary").pack(side="left", padx=6)
 
     def show_overall(self):
         self.clear_content()
-        lbl = tk.Label(self.content, text="Overall Books in Stock", font=(None, 14))
+        lbl = tb.Label(self.content, text="Overall Books in Stock", font=(None, 14))
         lbl.grid(row=0, column=0, sticky="w", padx=8, pady=8)
 
         cols = ("name",)
@@ -167,73 +189,53 @@ class BookstockerApp(tk.Tk):
 
     def show_requests(self):
         self.clear_content()
-        lbl = tk.Label(self.content, text="Requests (Wishlist)", font=(None, 14))
+        lbl = tb.Label(self.content, text="Requests", font=(None, 18, "bold"))
         lbl.grid(row=0, column=0, sticky="w", padx=8, pady=8)
 
-        # Form to add requests
-        form = tk.Frame(self.content)
-        form.grid(row=1, column=0, sticky="nw", padx=8, pady=8)
+        # Main content frame with list of requests
+        main_frame = tb.Frame(self.content)
+        main_frame.grid(row=1, column=0, sticky="nsew", padx=8, pady=8)
+        main_frame.columnconfigure(0, weight=1)
+        main_frame.rowconfigure(0, weight=1)
+        self.content.rowconfigure(1, weight=1)
 
-        tk.Label(form, text="Title:").grid(row=0, column=0, sticky="w")
-        title_var = tk.StringVar()
-        tk.Entry(form, textvariable=title_var, width=40).grid(row=0, column=1, sticky="w", padx=4)
+        # Requests list card
+        list_card = tb.Frame(main_frame, padding=8, bootstyle="light")
+        list_card.pack(fill="both", expand=True)
+        list_card.columnconfigure(0, weight=1)
+        list_card.rowconfigure(0, weight=1)
 
-        tk.Label(form, text="Type:").grid(row=1, column=0, sticky="w")
-        type_var = tk.StringVar(value="paperback")
-        type_cb = ttk.Combobox(form, textvariable=type_var, values=("paperback", "hardcover"), state="readonly", width=20)
-        type_cb.grid(row=1, column=1, sticky="w", padx=4)
+        requests_frame = tb.Frame(list_card)
+        requests_frame.grid(row=0, column=0, sticky="nsew")
+        requests_frame.columnconfigure(0, weight=1)
 
-        def on_add_request():
-            title = title_var.get().strip()
-            btype = type_var.get().strip()
-            if not title:
-                messagebox.showerror("Invalid", "Title is required")
-                return
-            self.mgr.add_request(title=title, book_type=btype)
-            title_var.set("")
-            type_var.set("paperback")
-            refresh_requests()
-
-        tk.Button(form, text="Add Request", command=on_add_request).grid(row=2, column=0, columnspan=2, sticky="w", pady=6)
-
-        # Requests list with checkmark/delete buttons
-        list_frame = tk.Frame(self.content)
-        list_frame.grid(row=2, column=0, sticky="nsew", padx=8, pady=8)
-        list_frame.columnconfigure(0, weight=1)
-        list_frame.rowconfigure(0, weight=1)
-
-        tk.Label(list_frame, text="Wishlist:").pack(anchor="w")
-        requests_frame = tk.Frame(list_frame)
-        requests_frame.pack(fill="both", expand=True)
-
-        def refresh_requests():
-            # clear all children in requests_frame
+        def populate_requests():
+            """Populate the main requests list."""
             for w in requests_frame.winfo_children():
                 w.destroy()
-            # add each request as a row, sorted alphabetically but preserving original indices
+
             sorted_requests = sorted(
                 enumerate(self.mgr.list_requests()),
                 key=lambda pair: pair[1].get('title', '').lower(),
             )
-            for idx, req in sorted_requests:
-                row = tk.Frame(requests_frame)
-                row.pack(fill="x", pady=2)
-                
-                # Title + Type label
-                title_text = f"{req['title']} ({req['book_type']})"
-                tk.Label(row, text=title_text, anchor="w").pack(side="left", fill="x", expand=True)
 
-                # Checkmark button (add to latest batch)
+            if not sorted_requests:
+                tk.Label(requests_frame, text="No requests yet", bg=CARD_BG, fg="gray", font=(None, 12)).pack(anchor="w", pady=20)
+                return
+
+            for idx, req in sorted_requests:
+                row = tb.Frame(requests_frame)
+                row.pack(fill="x", pady=6)
+
+                # Checkmark button on left
                 def on_checkmark(req=req):
-                    # get latest batch
                     batch_id = self.mgr.get_latest_batch()
                     if not batch_id:
                         messagebox.showerror("No Batch", "No batch created yet. Create a batch first.")
                         return
-                    # ask for quantity
                     qty_dialog = tk.Toplevel(self)
                     qty_dialog.title("Enter Quantity")
-                    qty_dialog.geometry("300x100")
+                    qty_dialog.geometry("300x120")
                     tk.Label(qty_dialog, text="How many copies?").pack(pady=8)
                     qty_var = tk.IntVar(value=1)
                     tk.Entry(qty_dialog, textvariable=qty_var, width=10).pack(pady=4)
@@ -247,52 +249,126 @@ class BookstockerApp(tk.Tk):
                         if qty <= 0:
                             messagebox.showerror("Invalid", "Quantity must be > 0")
                             return
-                        # check if item already in batch
                         batch = self.mgr.batches.get(batch_id, {})
                         found = False
                         for item in batch.get("items", []):
                             if item["title"].lower() == req["title"].lower() and item["book_type"].lower() == req["book_type"].lower():
-                                # increment quantity
                                 item["quantity"] += qty
                                 found = True
                                 break
                         if not found:
-                            # add new item
                             self.mgr.add_item_to_batch(batch_id, req["title"], req["book_type"], qty)
                         else:
-                            # save updated batch
                             self.mgr._save_batches()
                         messagebox.showinfo("Added", f"Added {qty}x '{req['title']}' to batch")
                         qty_dialog.destroy()
-                        self.show_requests()  # refresh
 
                     tk.Button(qty_dialog, text="OK", command=on_ok).pack(pady=4)
 
-                tk.Button(row, text="✓", width=3, command=on_checkmark).pack(side="right", padx=2)
+                # Title and type stacked on left
+                text_frame = tb.Frame(row)
+                text_frame.pack(side="left", fill="both", expand=True, padx=(8, 12))
+                
+                tb.Label(text_frame, text=f"{req['title']}", font=(None, 12)).pack(anchor="w", fill="x")
+                tb.Label(text_frame, text=f"{req['book_type']}", font=(None, 10)).pack(anchor="w", fill="x")
 
-                # Delete button
+                # Delete button on right
                 def on_delete(idx=idx):
                     self.mgr.remove_request(idx)
-                    refresh_requests()
+                    populate_requests()
 
-                tk.Button(row, text="✕", width=3, fg="red", command=on_delete).pack(side="right", padx=2)
+                tb.Button(row, text="✕", width=2, command=on_delete, bootstyle="danger-link").pack(side="right", padx=4, pady=8)
 
-        refresh_requests()
+                # Checkmark button on right (before x)
+                tb.Button(row, text="✓", width=2, command=on_checkmark, bootstyle="success-link").pack(side="right", padx=4, pady=8)
+
+        populate_requests()
+
+        # Bottom-right action buttons (+ and trash)
+        button_area = tb.Frame(self.content)
+        button_area.grid(row=2, column=0, sticky="se", padx=8, pady=8)
+
+        # Modal form overlay
+        modal_frame = None
+        modal_vars = {"title_var": None, "type_var": None}
+
+        def show_add_form():
+            """Show modal form for adding a request."""
+            nonlocal modal_frame
+            
+            # Create overlay frame
+            modal_frame = tb.Frame(self.content, padding=20, bootstyle="light")
+            modal_frame.grid(row=1, column=0, sticky="nsew", padx=120, pady=60, in_=self.content)
+            modal_frame.columnconfigure(0, weight=1)
+
+            # Title label - no alignment with close button
+            tb.Label(modal_frame, text="Add Request", font=(None, 14, "bold")).grid(row=0, column=0, sticky="w", pady=(0, 12))
+
+            # X button in top-right (separate row)
+            x_btn = tb.Button(modal_frame, text="✕", width=2, command=lambda: close_form(), bootstyle="link")
+            x_btn.grid(row=0, column=1, sticky="ne")
+
+            # Title input
+            tb.Label(modal_frame, text="Title:").grid(row=1, column=0, columnspan=2, sticky="w", pady=(0, 4))
+            title_var = tk.StringVar()
+            title_entry = tb.Entry(modal_frame, textvariable=title_var, width=35)
+            title_entry.grid(row=2, column=0, columnspan=2, sticky="ew", pady=(0, 12))
+            title_entry.focus()
+            modal_vars["title_var"] = title_var
+
+            # Type input
+            tb.Label(modal_frame, text="Type:").grid(row=3, column=0, columnspan=2, sticky="w", pady=(0, 4))
+            type_var = tk.StringVar(value="paperback")
+            type_cb = ttk.Combobox(modal_frame, textvariable=type_var, values=("paperback", "hardcover"), state="readonly", width=32)
+            type_cb.grid(row=4, column=0, columnspan=2, sticky="ew", pady=(0, 16))
+            modal_vars["type_var"] = type_var
+
+            # Checkmark button
+            def on_add_request():
+                title = title_var.get().strip()
+                btype = type_var.get().strip()
+                if not title:
+                    messagebox.showerror("Invalid", "Title is required")
+                    return
+                self.mgr.add_request(title=title, book_type=btype)
+                close_form()
+                populate_requests()
+
+            check_btn = tb.Button(modal_frame, text="✓", command=on_add_request, bootstyle="success")
+            check_btn.grid(row=5, column=1, sticky="se", pady=(8, 0))
+
+        def close_form():
+            """Close the modal form."""
+            nonlocal modal_frame
+            if modal_frame:
+                modal_frame.grid_forget()
+                modal_frame = None
+                modal_vars["title_var"] = None
+                modal_vars["type_var"] = None
+
+        def on_clear_all():
+            if messagebox.askyesno("Clear All", "Delete all requests?"):
+                self.mgr.requests = []
+                self.mgr._save_requests()
+                populate_requests()
+
+        tb.Button(button_area, text="+", width=3, command=show_add_form, bootstyle="primary").pack(side="right", padx=2)
+        tb.Button(button_area, text="🗑", width=3, command=on_clear_all, bootstyle="link").pack(side="right", padx=2)
 
     def show_in_shipment(self):
         self.clear_content()
-        lbl = tk.Label(self.content, text="In Shipment", font=(None, 14))
+        lbl = tb.Label(self.content, text="In Shipment", font=(None, 14))
         lbl.grid(row=0, column=0, sticky="w", padx=8, pady=8)
 
         # Frame to display batches with shipment status
-        list_frame = tk.Frame(self.content)
+        list_frame = tb.Frame(self.content)
         list_frame.grid(row=1, column=0, sticky="nsew", padx=8, pady=8)
         list_frame.columnconfigure(0, weight=1)
         list_frame.rowconfigure(0, weight=1)
 
-        tk.Label(list_frame, text="Batch Status:").pack(anchor="w", pady=(0, 8))
+        tb.Label(list_frame, text="Batch Status:").pack(anchor="w", pady=(0, 8))
         
-        batches_container = tk.Frame(list_frame)
+        batches_container = tb.Frame(list_frame)
         batches_container.pack(fill="both", expand=True)
 
         def refresh_shipments():
@@ -373,18 +449,19 @@ class BookstockerApp(tk.Tk):
 
     def show_batches(self):
         self.clear_content()
-        lbl = tk.Label(self.content, text="Batches", font=(None, 14))
+        lbl = tb.Label(self.content, text="Batches", font=(None, 14))
         lbl.grid(row=0, column=0, sticky="w", padx=8, pady=8)
-        # Two-column layout: left for batches, right for batch details
-        # ensure content columns allocate space appropriately
-        self.content.columnconfigure(0, weight=1)
-        self.content.columnconfigure(1, weight=3)
+        # Two-pane layout: left for batches, right for batch details
+        # use a PanedWindow so the divider is draggable and panes resize adaptively
+        self.content.rowconfigure(1, weight=1)
+        paned = ttk.Panedwindow(self.content, orient="horizontal")
+        paned.grid(row=1, column=0, sticky="nsew", padx=8, pady=8)
 
-        left = tk.Frame(self.content)
-        left.grid(row=1, column=0, sticky="nsew", padx=8, pady=8)
+        left = tb.Frame(paned)
         left.rowconfigure(1, weight=1)
+        paned.add(left, weight=1)
 
-        tk.Label(left, text="Batches:").grid(row=0, column=0, sticky="w")
+        tb.Label(left, text="Batches:").grid(row=0, column=0, sticky="w")
         batch_listbox = tk.Listbox(left, width=30, height=12)
         batch_listbox.grid(row=1, column=0, sticky="nsew")
         lb_scroll = ttk.Scrollbar(left, orient="vertical", command=batch_listbox.yview)
@@ -392,7 +469,7 @@ class BookstockerApp(tk.Tk):
         lb_scroll.grid(row=1, column=1, sticky="ns")
 
         name_var = tk.StringVar()
-        tk.Entry(left, textvariable=name_var, width=25).grid(row=2, column=0, sticky="w", pady=6)
+        tb.Entry(left, textvariable=name_var, width=25).grid(row=2, column=0, sticky="w", pady=6)
         def on_create_batch():
             name_input = name_var.get().strip()
             # pass None to let manager auto-name sequential batches when empty
@@ -406,7 +483,7 @@ class BookstockerApp(tk.Tk):
                     on_select_batch()
                     break
 
-        tk.Button(left, text="Create Batch", command=on_create_batch).grid(row=3, column=0, sticky="w")
+        tb.Button(left, text="Create Batch", command=on_create_batch, bootstyle="primary").grid(row=3, column=0, sticky="w")
         def on_delete_batch():
             sel = batch_listbox.curselection()
             if not sel:
@@ -419,24 +496,24 @@ class BookstockerApp(tk.Tk):
                 refresh_batches()
                 clear_batch_view()
 
-        tk.Button(left, text="Delete Batch", command=on_delete_batch).grid(row=4, column=0, sticky="w", pady=4)
+        tb.Button(left, text="Delete Batch", command=on_delete_batch, bootstyle="danger").grid(row=4, column=0, sticky="w", pady=4)
 
         # Right: selected batch details and item form
-        right = tk.Frame(self.content)
-        right.grid(row=1, column=1, sticky="nsew", padx=8, pady=8)
+        right = tb.Frame(paned)
         right.columnconfigure(0, weight=1)
         right.rowconfigure(1, weight=1)
+        paned.add(right, weight=3)
 
-        selected_label = tk.Label(right, text="No batch selected", font=(None, 12))
+        selected_label = tb.Label(right, text="No batch selected", font=(None, 12))
         selected_label.grid(row=0, column=0, sticky="w")
 
-        items_canvas = tk.Canvas(right, highlightthickness=0)
+        items_canvas = tk.Canvas(right, highlightthickness=0, bg=CARD_BG)
         items_canvas.grid(row=1, column=0, sticky="nsew")
         items_scroll = ttk.Scrollbar(right, orient="vertical", command=items_canvas.yview)
         items_scroll.grid(row=1, column=1, sticky="ns")
-        items_canvas.configure(yscrollcommand=items_scroll.set)
+        items_canvas.configure(yscrollcommand=items_scroll.set, bg=CARD_BG)
 
-        items_container = tk.Frame(items_canvas)
+        items_container = tk.Frame(items_canvas, bg=CARD_BG)
         items_window = items_canvas.create_window((0, 0), window=items_container, anchor="nw")
 
         def on_items_container_configure(event=None):
@@ -448,25 +525,34 @@ class BookstockerApp(tk.Tk):
         items_container.bind("<Configure>", on_items_container_configure)
         items_canvas.bind("<Configure>", on_items_canvas_configure)
 
-        form = tk.Frame(right)
+        form = tb.Frame(right)
         form.grid(row=2, column=0, sticky="w", pady=8)
-        tk.Label(form, text="Title:").grid(row=0, column=0, sticky="w")
+        tb.Label(form, text="Title:").grid(row=0, column=0, sticky="w")
         title_var = tk.StringVar()
-        tk.Entry(form, textvariable=title_var, width=40).grid(row=0, column=1, sticky="w")
+        tb.Entry(form, textvariable=title_var, width=40).grid(row=0, column=1, sticky="w")
 
-        tk.Label(form, text="Type:").grid(row=1, column=0, sticky="w")
+        tb.Label(form, text="Type:").grid(row=1, column=0, sticky="w")
         type_var = tk.StringVar(value="paperback")
         type_cb = ttk.Combobox(form, textvariable=type_var, values=("paperback", "hardcover"), state="readonly", width=20)
         type_cb.grid(row=1, column=1, sticky="w")
 
-        tk.Label(form, text="Quantity:").grid(row=2, column=0, sticky="w")
+        tb.Label(form, text="Quantity:").grid(row=2, column=0, sticky="w")
         qty_var = tk.IntVar(value=1)
-        tk.Entry(form, textvariable=qty_var, width=10).grid(row=2, column=1, sticky="w")
+        tb.Entry(form, textvariable=qty_var, width=10).grid(row=2, column=1, sticky="w")
+
+        # edit_state keeps track if the user is editing an existing item
+        edit_state = {"batch_id": None, "item_index": None}
 
         def clear_batch_view():
             selected_label.config(text="No batch selected")
             for w in items_container.winfo_children():
                 w.destroy()
+            # reset edit state and form
+            edit_state["batch_id"] = None
+            edit_state["item_index"] = None
+            title_var.set("")
+            type_var.set("paperback")
+            qty_var.set(1)
 
         def refresh_batches():
             batch_listbox.delete(0, "end")
@@ -477,7 +563,7 @@ class BookstockerApp(tk.Tk):
         def on_select_batch(event=None):
             sel = batch_listbox.curselection()
             if not sel:
-                clear_batch_view()
+                # ignore transient empty-selection events (e.g. focus changes when editing entries)
                 return
             idx = sel[0]
             batches = self.mgr.list_batches()
@@ -490,11 +576,29 @@ class BookstockerApp(tk.Tk):
             indexed_items = list(enumerate(batch.get('items', [])))
             sorted_items = sorted(indexed_items, key=lambda pair: pair[1].get('title', '').lower())
             for item_index, item in sorted_items:
-                row = tk.Frame(items_container)
+                row = tk.Frame(items_container, bg="white")
                 row.pack(fill="x", pady=2)
 
                 text = f"{item.get('title')} ({item.get('book_type')}) - {item.get('quantity')}"
-                tk.Label(row, text=text, anchor="w").pack(side="left", fill="x", expand=True)
+                lbl = tk.Label(row, text=text, anchor="w", bg="white")
+                lbl.pack(side="left", fill="x", expand=True)
+
+                # double-clicking a row loads it into the form for editing
+                def start_edit(event=None, batch_id=batch["id"], idx=item_index, it=item):
+                    edit_state["batch_id"] = batch_id
+                    edit_state["item_index"] = idx
+                    title_var.set(it.get("title"))
+                    type_var.set(it.get("book_type"))
+                    try:
+                        qty_var.set(int(it.get("quantity", 1)))
+                    except Exception:
+                        qty_var.set(1)
+                    try:
+                        add_button.config(text="Update Item")
+                    except Exception:
+                        pass
+
+                lbl.bind("<Double-1>", start_edit)
 
                 if not batch.get("committed"):
                     def on_remove_item(batch_id=batch["id"], idx=item_index):
@@ -507,11 +611,24 @@ class BookstockerApp(tk.Tk):
 
         def on_add_to_batch():
             sel = batch_listbox.curselection()
-            if not sel:
-                messagebox.showerror("No batch", "Select or create a batch first")
-                return
-            idx = sel[0]
             batches = self.mgr.list_batches()
+            if not sel:
+                # if nothing selected, default to the latest batch (if any)
+                latest_bid = self.mgr.get_latest_batch()
+                if not latest_bid:
+                    messagebox.showerror("No batch", "No batch available. Create a batch first")
+                    return
+                # find index of latest batch in the list and select it for clarity
+                for i, b in enumerate(batches):
+                    if b.get("id") == latest_bid:
+                        batch_listbox.selection_clear(0, "end")
+                        batch_listbox.selection_set(i)
+                        batch_listbox.see(i)
+                        on_select_batch()
+                        idx = i
+                        break
+            else:
+                idx = sel[0]
             bid = batches[idx]["id"]
             title = title_var.get().strip()
             btype = type_var.get().strip()
@@ -523,10 +640,42 @@ class BookstockerApp(tk.Tk):
             if not title:
                 messagebox.showerror("Invalid", "Title required")
                 return
+            # if editing, update the existing item instead of appending
+            if edit_state.get("batch_id") and edit_state.get("item_index") is not None:
+                ebid = edit_state["batch_id"]
+                eidx = edit_state["item_index"]
+                if ebid == bid and ebid in self.mgr.batches:
+                    items = self.mgr.batches[ebid].get("items", [])
+                    if 0 <= eidx < len(items):
+                        items[eidx] = {"title": title, "book_type": btype, "quantity": qty}
+                        self.mgr._save_batches()
+                        # clear edit state and update UI
+                        edit_state["batch_id"] = None
+                        edit_state["item_index"] = None
+                        try:
+                            add_button.config(text="Add to Batch")
+                        except Exception:
+                            pass
+                        on_select_batch()
+                        return
+            # otherwise, append a new item
             self.mgr.add_item_to_batch(bid, title, btype, qty)
             on_select_batch()
 
-        tk.Button(form, text="Add to Batch", command=on_add_to_batch).grid(row=3, column=0, columnspan=2, pady=6)
+        add_button = tk.Button(form, text="Add to Batch", command=on_add_to_batch)
+        add_button.grid(row=3, column=0, columnspan=1, pady=6, sticky="w")
+        def on_cancel_edit():
+            edit_state["batch_id"] = None
+            edit_state["item_index"] = None
+            title_var.set("")
+            type_var.set("paperback")
+            qty_var.set(1)
+            try:
+                add_button.config(text="Add to Batch")
+            except Exception:
+                pass
+
+        tk.Button(form, text="Cancel", command=on_cancel_edit).grid(row=3, column=1, pady=6, sticky="w")
 
         def on_commit_batch():
             sel = batch_listbox.curselection()
@@ -547,6 +696,16 @@ class BookstockerApp(tk.Tk):
         tk.Button(right, text="Commit Batch to Stock", command=on_commit_batch).grid(row=3, column=0, sticky="w", pady=6)
 
         refresh_batches()
+        # Auto-select the latest batch when opening the Batches pane
+        latest = self.mgr.get_latest_batch()
+        if latest:
+            for i, b in enumerate(self.mgr.list_batches()):
+                if b.get("id") == latest:
+                    batch_listbox.selection_clear(0, "end")
+                    batch_listbox.selection_set(i)
+                    batch_listbox.see(i)
+                    on_select_batch()
+                    break
 
 
 if __name__ == "__main__":

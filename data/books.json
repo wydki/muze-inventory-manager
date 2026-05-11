@@ -1,1 +1,47 @@
-[]
+[
+  {
+    "isbn": "",
+    "title": "The Spanish Love Deception",
+    "author": "",
+    "book_type": "paperback",
+    "quantity": 1,
+    "batch_id": "b95ce17d-69d7-4b1f-acd8-d580bdf2130f",
+    "batch_source": "Batch 1"
+  },
+  {
+    "isbn": "",
+    "title": "If We Ever Meet Again",
+    "author": "",
+    "book_type": "paperback",
+    "quantity": 8,
+    "batch_id": "b95ce17d-69d7-4b1f-acd8-d580bdf2130f",
+    "batch_source": "Batch 1"
+  },
+  {
+    "isbn": "",
+    "title": "Circe",
+    "author": "",
+    "book_type": "paperback",
+    "quantity": 17,
+    "batch_id": "b95ce17d-69d7-4b1f-acd8-d580bdf2130f",
+    "batch_source": "Batch 1"
+  },
+  {
+    "isbn": "",
+    "title": "Red, White & Royal Blue",
+    "author": "",
+    "book_type": "paperback",
+    "quantity": 5,
+    "batch_id": "b95ce17d-69d7-4b1f-acd8-d580bdf2130f",
+    "batch_source": "Batch 1"
+  },
+  {
+    "isbn": "",
+    "title": "Bully",
+    "author": "",
+    "book_type": "paperback",
+    "quantity": 1,
+    "batch_id": "b95ce17d-69d7-4b1f-acd8-d580bdf2130f",
+    "batch_source": "Batch 1"
+  }
+]
